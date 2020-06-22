@@ -16,10 +16,10 @@ class WebOfficeServiceProvider extends ServiceProvider
         ], 'weboffice');
 
         // 加载数据库迁移文件
-        $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
+        // $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
 
         // 加载路由
-        $this->loadRoutesFrom(__DIR__ . '/../../routes/api.php');
+        $this->loadRoutesFrom(__DIR__ . '/../../routes/wps.php');
     }
 
 

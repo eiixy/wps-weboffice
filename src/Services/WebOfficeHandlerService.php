@@ -5,7 +5,7 @@ namespace Eiixy\WebOffice\Services;
 use Eiixy\WebOffice\WebOfficeInterface;
 use Illuminate\Support\Str;
 
-abstract class WebOfficeService implements WebOfficeInterface
+abstract class WebOfficeHandlerService implements WebOfficeInterface
 {
     private $appid;
     private $appkey;
