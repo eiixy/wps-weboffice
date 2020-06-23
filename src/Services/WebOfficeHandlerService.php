@@ -2,10 +2,14 @@
 
 namespace Eiixy\WebOffice\Services;
 
+use Eiixy\WebOffice\File;
+use Eiixy\WebOffice\Files;
+use Eiixy\WebOffice\User;
+use Eiixy\WebOffice\Users;
 use Eiixy\WebOffice\WebOfficeInterface;
 use Illuminate\Support\Str;
 
-abstract class WebOfficeHandlerService implements WebOfficeInterface
+abstract class WebOfficeHandlerService
 {
     private $appid;
     private $appkey;
@@ -33,6 +37,49 @@ abstract class WebOfficeHandlerService implements WebOfficeInterface
         $signature = base64_encode(hash_hmac('sha1', $content, $this->appkey, true));
         $params[] = '_w_signature=' . urlencode($signature);
         return implode('&', $params);
+    }
+
+
+    /**
+     * @param int $rename   重命名
+     * @param int $history  历史版本
+     * @param int $copy     复制
+     * @param int $export   导出PDF
+     * @param int $print    打印
+     */
+    public function setUserAcl($rename = 0, $history = 1, $copy = 1, $export = 1, $print = 1)
+    {
+
+    }
+
+    /**
+     * @param int $type             水印类型， 0为无水印； 1为文字水印
+     * @param string $value         文字水印的文字
+     * @param string $fillstyle     水印的透明度
+     * @param string $font          水印的字体
+     * @param int $rotate           水印的旋转度
+     * @param int $horizontal       水印水平间距
+     * @param int $vertical         水印垂直间距
+     */
+    public function setWatermark(
+        $type = 0, 
+        $value = "禁止传阅", 
+        $fillstyle = "rgba( 192, 192, 192, 0.6 )", 
+        $font = "bold 20px Serif", 
+        $rotate = -0.7853982, 
+        $horizontal = 50, 
+        $vertical = 100)
+    {
+
+    }
+
+    /**
+     * 用户操作权限
+     * @params string permission write：可编辑，read：预览
+     */
+    public function setPermission($permission = 'read')
+    {
+        # code...
     }
 
     /**
@@ -67,28 +114,28 @@ abstract class WebOfficeHandlerService implements WebOfficeInterface
         }
     }
 
-    abstract public function authUser($token): array;
+   abstract public function authUser($token): array;
 
     // 获取文件元数据
-    abstract public function fileInfo($file_id, $version = null, $user_acl = null, $watermark = null);
+    abstract public function fileInfo($file_id, $version = null, $user_acl = null, $watermark = null):File;
 
     // 获取用户信息
-    abstract public function UserInfo(array $ids): array;
+    abstract public function UserInfo(array $ids): Users;
 
     // 通知此文件目前有哪些人正在协作
     abstract public function online();
 
     // 上传文件新版本
-    abstract public function save($file_id, $file): array;
+    abstract public function save($file_id, $file): File;
 
     // 获取特定版本的文件信息
-    abstract public function version($file_id, $version): array;
+    abstract public function version($file_id, $version):Files;
 
     // 文件重命名
-    abstract public function rename($file_id, $name): array;
+    abstract public function rename($file_id, $name);
 
     // 新建文件
-    abstract public function new($file_id, $file): array;
+    abstract public function new($file_id, $file):File;
 
     // 回调通知
     abstract public function onNotify();

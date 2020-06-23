@@ -22,7 +22,7 @@ class WebOfficeController
     // 获取文件元数据
     public function fileInfo()
     {
-        //        $auth = JWTAuth::setToken($this->token)->toUser()->toArray();
+            //    $auth = JWTAuth::setToken($this->token)->toUser()->toArray();
         $auth = $this->webOffice->authUser($this->token);
         $file = $this->webOffice->fineInfo($this->file_id);
         //        $auth['id'] = 'id' . $auth['id'];
