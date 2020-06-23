@@ -16,22 +16,61 @@ class File
     public $modify_time;
     public $download_url;
 
-    public function __construct(string $id, string $name, int $version, int $size, string $creator, int $create_time, string $modifier, int $modify_time, string $download_url)
+    public $user_acl;
+    public $watermark;
+
+    /**
+     * @param int $rename 重命名
+     * @param int $history 历史版本
+     * @param int $copy 复制
+     * @param int $export 导出PDF
+     * @param int $print 打印
+     */
+    public function setUserAcl($rename = 0, $history = 1, $copy = 1, $export = 1, $print = 1)
     {
-        $this->id = $id;
-        $this->name = $name;
-        $this->version = $version;
-        $this->size = $size;
-        $this->creator = $creator;
-        $this->create_time = $create_time;
-        $this->modifier = $modifier;
-        $this->modify_time = $modify_time;
-        $this->download_url = $download_url;
+        $this->user_acl = [
+            'rename' => $rename,
+            'history' => $history,
+            'copy' => $copy,
+            'export' => $export,
+            'print' => $print,
+        ];
+        return $this;
+    }
+
+    /**
+     * @param int $type 水印类型， 0为无水印； 1为文字水印
+     * @param string $value 文字水印的文字
+     * @param string $fillstyle 水印的透明度
+     * @param string $font 水印的字体
+     * @param int $rotate 水印的旋转度
+     * @param int $horizontal 水印水平间距
+     * @param int $vertical 水印垂直间距
+     */
+    public function setWatermark(
+        $type = 0,
+        $value = "禁止传阅",
+        $fillstyle = "rgba( 192, 192, 192, 0.6 )",
+        $font = "bold 20px Serif",
+        $rotate = -0.7853982,
+        $horizontal = 50,
+        $vertical = 100)
+    {
+        $this->watermark = [
+            'type' => $type,
+            'value' => $value,
+            'fillstyle' => $fillstyle,
+            'font' => $font,
+            'rotate' => $rotate,
+            'horizontal' => $horizontal,
+            'vertical' => $vertical,
+        ];
+        return $this;
     }
 
     public function toArray()
     {
-        return [
+        $file = [
             'id' => $this->id,
             'name' => $this->name,
             'version' => $this->version,
@@ -42,6 +81,13 @@ class File
             'modify_time' => $this->modify_time,
             'download_url' => $this->download_url,
         ];
+        if ($this->user_acl){
+            $file['user_acl'] = $this->user_acl;
+        }
+        if ($this->watermark){
+            $file['watermark'] = $this->watermark;
+        }
+        return $file;
     }
-
 }
+

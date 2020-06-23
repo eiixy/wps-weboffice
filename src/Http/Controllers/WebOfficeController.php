@@ -1,32 +1,34 @@
 <?php
 
 
-namespace Eiixy\WebOffice\Http\Controller;
+namespace Eiixy\WebOffice\Http\Controllers;
 
 
 use Eiixy\WebOffice\WebOfficeInterface;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class WebOfficeController
 {
     private $token;
     private $file_id;
     private $webOffice;
+
     public function __construct(WebOfficeInterface $webOffice)
     {
         $this->webOffice = $webOffice;
         $this->token = \request()->header('x-wps-weboffice-token');
         $this->file_id = \request()->header('x-weboffice-file-id');
+        $params = \request()->query();
+        $signature = Arr::pull($params,'_w_signature');
+        $webOffice->chackSign($params,$signature);
     }
 
     // 获取文件元数据
     public function fileInfo()
     {
-            //    $auth = JWTAuth::setToken($this->token)->toUser()->toArray();
-        $auth = $this->webOffice->authUser($this->token);
-        $file = $this->webOffice->fineInfo($this->file_id);
-        //        $auth['id'] = 'id' . $auth['id'];
-        //        $auth['avatar_url'] = $auth['avatar_url'];
+        $auth = $this->webOffice->authUser($this->token)->setPermission('read')->toArray();
+        $file = $this->webOffice->fileInfo($this->file_id)->toArray();
         return response()->json(['file' => $file, 'user' => $auth]);
     }
 
@@ -75,13 +77,18 @@ class WebOfficeController
     }
 
     // 获取所有历史版本文件信息
-    public function history()
+    public function history(Request $request)
     {
+        $offset = $request->input('offset');
+        $count = $request->input('count');
+        $history = $this->webOffice->history();
     }
 
     // 新建文件
-    public function new()
+    public function new($file_id,$file)
     {
+        $file = $this->webOffice->new($file_id,$file,$name);
+        return $this->webOffice->authUser()->id;
     }
 
     // 回调通知

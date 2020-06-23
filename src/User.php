@@ -24,7 +24,7 @@ class User
         return $this;
     }
 
-    public function __toArray()
+    public function toArray()
     {
         $res = [
             'id' => $this->id,

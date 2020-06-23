@@ -7,7 +7,7 @@ interface WebOfficeInterface
     public function authUser($token): User;
 
     // 获取文件元数据
-    public function fileInfo($file_id, $version = null, $user_acl = null, $watermark = null):File;
+    public function fileInfo($file_id): File;
 
     // 获取用户信息
     public function UserInfo(array $ids): Users;
@@ -19,13 +19,16 @@ interface WebOfficeInterface
     public function save($file_id, $file): File;
 
     // 获取特定版本的文件信息
-    public function version($file_id, $version): Files;
+    public function version($file_id, $version): File;
 
     // 文件重命名
     public function rename($file_id, $name);
 
+    // 获取所有历史版本文件信息
+    public function history($file_id, $offset, $count): Files;
+
     // 新建文件
-    public function new($file_id, $file):File;
+    public function new($file_id, $file, $user_id): File;
 
     // 回调通知
     public function onNotify();

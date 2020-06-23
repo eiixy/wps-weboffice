@@ -23,8 +23,8 @@ WPS_APPKEY=xxxxxxxxx
     <?php
     namespace App\Services;
     
-    use Eiixy\WebOffice\Services\WebOfficeHandlerService`;
-
+    use Eiixy\WebOffice\Services\WebOfficeHandlerService;
+ 
     class WebOfficeService extends WebOfficeHandlerService
     {
         // 实现相关业务代码....

@@ -21,8 +21,8 @@ class CreateWebOfficeResourceTable extends Migration
             $table->string('suffix')->nullable()->comment('后缀');
             $table->float('size')->nullable()->comment('资源大小'); // KB
             $table->string('url')->nullable()->comment('访问地址');
-            $table->integer('creator_id')->nullable()->comment('创建者ID');
-            $table->integer('modifier_id')->nullable()->comment('修改者ID');
+            $table->integer('creator')->nullable()->comment('创建者ID');
+            $table->integer('modifier')->nullable()->comment('修改者ID');
             $table->morphs('resourceable');
             $table->timestamps();
         });

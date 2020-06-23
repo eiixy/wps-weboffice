@@ -9,7 +9,7 @@ use Eiixy\WebOffice\Users;
 use Eiixy\WebOffice\WebOfficeInterface;
 use Illuminate\Support\Str;
 
-abstract class WebOfficeHandlerService
+abstract class WebOfficeHandlerService implements WebOfficeInterface
 {
     private $appid;
     private $appkey;
@@ -39,47 +39,18 @@ abstract class WebOfficeHandlerService
         return implode('&', $params);
     }
 
-
-    /**
-     * @param int $rename   重命名
-     * @param int $history  历史版本
-     * @param int $copy     复制
-     * @param int $export   导出PDF
-     * @param int $print    打印
-     */
-    public function setUserAcl($rename = 0, $history = 1, $copy = 1, $export = 1, $print = 1)
+    public function chackSign($params, $signature)
     {
-
-    }
-
-    /**
-     * @param int $type             水印类型， 0为无水印； 1为文字水印
-     * @param string $value         文字水印的文字
-     * @param string $fillstyle     水印的透明度
-     * @param string $font          水印的字体
-     * @param int $rotate           水印的旋转度
-     * @param int $horizontal       水印水平间距
-     * @param int $vertical         水印垂直间距
-     */
-    public function setWatermark(
-        $type = 0, 
-        $value = "禁止传阅", 
-        $fillstyle = "rgba( 192, 192, 192, 0.6 )", 
-        $font = "bold 20px Serif", 
-        $rotate = -0.7853982, 
-        $horizontal = 50, 
-        $vertical = 100)
-    {
-
-    }
-
-    /**
-     * 用户操作权限
-     * @params string permission write：可编辑，read：预览
-     */
-    public function setPermission($permission = 'read')
-    {
-        # code...
+        $_params = [];
+        sort($params);
+        foreach ($params as $k => $v) {
+            $_params[] = $k . '=' . $v;
+        }
+        $content = implode('', $_params) . '_w_secretkey=' . $this->appkey;
+        $_signature = base64_encode(hash_hmac('sha1', $content, $this->appkey, true));
+        if ($signature != $_signature) {
+            throw new \Exception('签名验证失败');
+        }
     }
 
     /**
@@ -114,10 +85,10 @@ abstract class WebOfficeHandlerService
         }
     }
 
-   abstract public function authUser($token): array;
+    abstract public function authUser($token): User;
 
     // 获取文件元数据
-    abstract public function fileInfo($file_id, $version = null, $user_acl = null, $watermark = null):File;
+    abstract public function fileInfo($file_id): File;
 
     // 获取用户信息
     abstract public function UserInfo(array $ids): Users;
@@ -129,14 +100,18 @@ abstract class WebOfficeHandlerService
     abstract public function save($file_id, $file): File;
 
     // 获取特定版本的文件信息
-    abstract public function version($file_id, $version):Files;
+    abstract public function version($file_id, $version): File;
 
     // 文件重命名
     abstract public function rename($file_id, $name);
 
+    // 获取所有历史版本文件信息
+    abstract public function history($file_id, $offset, $count): Files;
+
     // 新建文件
-    abstract public function new($file_id, $file):File;
+    abstract public function new($file_id, $file, $user_id): File;
 
     // 回调通知
     abstract public function onNotify();
+
 }

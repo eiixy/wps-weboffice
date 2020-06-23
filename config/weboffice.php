@@ -4,7 +4,7 @@ return [
     'appid' => env('WPS_APPID'),
     'appkey' => env('WPS_APPKEY'),
     // 业务处理
-    'handler' => \App\Services\WebOfficeService::class,
+    'handler' => \Eiixy\WebOffice\Services\WebOfficeService::class,
     'domains' => [
         /**
          * 文档查看地址
