@@ -2,6 +2,7 @@
 
 namespace Eiixy\WebOffice\Services;
 
+use Eiixy\WebOffice\Exceptions\WebOfficeException;
 use Eiixy\WebOffice\File;
 use Eiixy\WebOffice\Files;
 use Eiixy\WebOffice\User;
@@ -39,6 +40,12 @@ abstract class WebOfficeHandlerService implements WebOfficeInterface
         return implode('&', $params);
     }
 
+    /**
+     * 验证签名有效性
+     * @param $params
+     * @param $signature
+     * @throws WebOfficeException
+     */
     public function chackSign($params, $signature)
     {
         $_params = [];
@@ -49,7 +56,7 @@ abstract class WebOfficeHandlerService implements WebOfficeInterface
         $content = implode('', $_params) . '_w_secretkey=' . $this->appkey;
         $_signature = base64_encode(hash_hmac('sha1', $content, $this->appkey, true));
         if ($signature != $_signature) {
-            throw new \Exception('签名验证失败');
+            throw new WebOfficeException('签名验证失败', -1);
         }
     }
 
