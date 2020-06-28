@@ -2,12 +2,14 @@
 
 namespace Eiixy\WebOffice\Services;
 
+use Doctrine\DBAL\Schema\Schema;
 use Eiixy\WebOffice\Exceptions\WebOfficeException;
 use Eiixy\WebOffice\File;
 use Eiixy\WebOffice\Files;
 use Eiixy\WebOffice\User;
 use Eiixy\WebOffice\Users;
 use Eiixy\WebOffice\WebOfficeInterface;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 abstract class WebOfficeHandlerService implements WebOfficeInterface
@@ -19,10 +21,10 @@ abstract class WebOfficeHandlerService implements WebOfficeInterface
 
     public function __construct()
     {
-        $this->appid = config('wps.appid');
-        $this->appkey = config('wps.appkey');
-        $this->file_formats = config('wps.file_formats');
-        $this->domain = config('wps.domains.view');
+        $this->appid = env('weboffice.appid');
+        $this->appkey = config('weboffice.appkey');
+        $this->file_formats = config('weboffice.file_formats');
+        $this->domain = config('weboffice.domains.view');
     }
 
     /**
@@ -49,12 +51,17 @@ abstract class WebOfficeHandlerService implements WebOfficeInterface
     public function chackSign($params, $signature)
     {
         $_params = [];
-        sort($params);
+        $params = Arr::sort($params);
         foreach ($params as $k => $v) {
-            $_params[] = $k . '=' . $v;
+            if (!in_array($k,['_w_signature','access_token'])){
+                $_params[] = $k . '=' . $v;
+            }
         }
+//        dd($_params);
         $content = implode('', $_params) . '_w_secretkey=' . $this->appkey;
+//        dd($content);
         $_signature = base64_encode(hash_hmac('sha1', $content, $this->appkey, true));
+        $signature = str_replace(' ','+',$signature);
         if ($signature != $_signature) {
             throw new WebOfficeException('签名验证失败', -1);
         }
