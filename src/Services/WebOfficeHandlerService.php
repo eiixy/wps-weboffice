@@ -8,6 +8,7 @@ use Eiixy\WebOffice\File;
 use Eiixy\WebOffice\Files;
 use Eiixy\WebOffice\User;
 use Eiixy\WebOffice\Users;
+use Eiixy\WebOffice\WebOffice;
 use Eiixy\WebOffice\WebOfficeInterface;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
@@ -21,7 +22,7 @@ abstract class WebOfficeHandlerService implements WebOfficeInterface
 
     public function __construct()
     {
-        $this->appid = env('weboffice.appid');
+        $this->appid = config('weboffice.appid');
         $this->appkey = config('weboffice.appkey');
         $this->file_formats = config('weboffice.file_formats');
         $this->domain = config('weboffice.domains.view');
@@ -34,12 +35,12 @@ abstract class WebOfficeHandlerService implements WebOfficeInterface
      */
     public function sign(array $params)
     {
-        $params[] = '_w_appid=' . $this->appid;
-        sort($params);
-        $content = implode('', $params) . '_w_secretkey=' . $this->appkey;
+        $params['_w_appid'] = $this->appid;
+        ksort($params);
+        $content = http_build_query($params, null, '') . '_w_secretkey=' . $this->appkey;
         $signature = base64_encode(hash_hmac('sha1', $content, $this->appkey, true));
-        $params[] = '_w_signature=' . urlencode($signature);
-        return implode('&', $params);
+        $params['_w_signature'] = urlencode($signature);
+        return Arr::query($params);
     }
 
     /**
@@ -51,34 +52,45 @@ abstract class WebOfficeHandlerService implements WebOfficeInterface
     public function chackSign($params, $signature)
     {
         $_params = [];
-        $params = Arr::sort($params);
+        ksort($params);
         foreach ($params as $k => $v) {
-            if (!in_array($k,['_w_signature','access_token'])){
+            if (!in_array($k, ['_w_signature', 'access_token'])) {
                 $_params[] = $k . '=' . $v;
             }
         }
-//        dd($_params);
         $content = implode('', $_params) . '_w_secretkey=' . $this->appkey;
-//        dd($content);
         $_signature = base64_encode(hash_hmac('sha1', $content, $this->appkey, true));
-        $signature = str_replace(' ','+',$signature);
+        $signature = str_replace(' ', '+', $signature);
+
         if ($signature != $_signature) {
             throw new WebOfficeException('签名验证失败', -1);
         }
     }
 
     /**
-     * 获取查看链接
+     * 获取文件链接
      * @param $params
-     * @param $suffix
-     * @param $file_id
+     * @param $file
      * @return string
      */
-    public function getViewUrl($params, $suffix, $file_id)
+    public function getFileUrl(File $file, $auth_id, $permission)
     {
-        $file_type = $this->getFileTypeCode($suffix);
+        $params = [];
+
+        $params['_w_authid'] = $auth_id;
+        $params['_w_fileid'] = $file->uuid;
+        $params['_w_permission'] = $permission;
+
+        if ($file->user_acl) {
+            $params['_w_useracl'] = WebOffice::encode($file->user_acl);
+        }
+        if ($file->watermark) {
+            $params['_w_watermark'] = WebOffice::encode($file->watermark);
+        }
+
+        $file_type = $this->getFileTypeCode($file->suffix);
         $path = $this->sign($params);
-        return Str::finish($this->domain, '/') . $file_type . '/' . $file_id . '?' . $path;
+        return Str::finish($this->domain, '/') . $file_type . '/' . $file->uuid . '?' . $path;
     }
 
     /**
@@ -111,7 +123,7 @@ abstract class WebOfficeHandlerService implements WebOfficeInterface
     abstract public function online();
 
     // 上传文件新版本
-    abstract public function save($file_id, $file): File;
+    abstract public function save($file_id, $file, $user_id): File;
 
     // 获取特定版本的文件信息
     abstract public function version($file_id, $version): File;
@@ -120,7 +132,7 @@ abstract class WebOfficeHandlerService implements WebOfficeInterface
     abstract public function rename($file_id, $name);
 
     // 获取所有历史版本文件信息
-    abstract public function history($file_id, $offset, $count): Files;
+    abstract public function history($file_id, $offset, $count);
 
     // 新建文件
     abstract public function new($file_id, $file, $user_id): File;

@@ -7,9 +7,11 @@ namespace Eiixy\WebOffice;
 class File
 {
     public $id;
+    public $uuid;
     public $name;
     public $version;
     public $size;
+    public $suffix;
     public $creator;
     public $create_time;
     public $modifier;
@@ -20,58 +22,41 @@ class File
     public $watermark;
 
     /**
-     * @param int $rename 重命名
-     * @param int $history 历史版本
-     * @param int $copy 复制
-     * @param int $export 导出PDF
-     * @param int $print 打印
+     * @param array $options
      */
-    public function setUserAcl($rename = 0, $history = 1, $copy = 1, $export = 1, $print = 1)
+    public function setUserAcl($options)
     {
-        $this->user_acl = [
-            'rename' => $rename,
-            'history' => $history,
-            'copy' => $copy,
-            'export' => $export,
-            'print' => $print,
-        ];
+        $this->user_acl = array_merge([
+            'rename' => 0,      // 重命名
+            'history' => 1,     // 历史版本
+            'copy' => 1,        // 复制
+            'export' => 1,      // 导出PDF
+            'print' => 1,       // 打印
+        ],$options);
         return $this;
     }
 
     /**
-     * @param int $type 水印类型， 0为无水印； 1为文字水印
-     * @param string $value 文字水印的文字
-     * @param string $fillstyle 水印的透明度
-     * @param string $font 水印的字体
-     * @param int $rotate 水印的旋转度
-     * @param int $horizontal 水印水平间距
-     * @param int $vertical 水印垂直间距
+     * @param array $options
      */
-    public function setWatermark(
-        $type = 0,
-        $value = "禁止传阅",
-        $fillstyle = "rgba( 192, 192, 192, 0.6 )",
-        $font = "bold 20px Serif",
-        $rotate = -0.7853982,
-        $horizontal = 50,
-        $vertical = 100)
+    public function setWatermark($options)
     {
-        $this->watermark = [
-            'type' => $type,
-            'value' => $value,
-            'fillstyle' => $fillstyle,
-            'font' => $font,
-            'rotate' => $rotate,
-            'horizontal' => $horizontal,
-            'vertical' => $vertical,
-        ];
+        $this->watermark = array_merge([
+            'type' => 0,                                    //水印类型， 0为无水印； 1为文字水印
+            'value' => "禁止传阅",                          // 文字水印的文字
+            'fillstyle' => "rgba( 192, 192, 192, 0.6 )",    // 水印的透明度
+            'font' => "bold 20px Serif",                    // 水印的字体
+            'rotate' => -0.7853982,                         // 水印的旋转度
+            'horizontal' => 50,                             // 水印水平间距
+            'vertical' => 100,                              // 水印垂直间距
+        ],$options);
         return $this;
     }
 
     public function toArray()
     {
         $file = [
-            'id' => $this->id,
+            'id' => $this->uuid,
             'name' => $this->name,
             'version' => $this->version,
             'size' => $this->size,
@@ -87,7 +72,12 @@ class File
         if ($this->watermark){
             $file['watermark'] = $this->watermark;
         }
-        return $file;
+
+        return array_filter($file,function ($item){
+           if ($item){
+               return $item;
+           }
+        });
     }
 }
 

@@ -39,3 +39,8 @@ WPS_APPKEY=xxxxxxxxx
         'handler' => \App\Services\WebOfficeService::class,
         //.....
     ```
+
+5. 自定义参数
+    1. auth_id          // 签名与token做二次认证
+    2. permission       // 获取方式 预览/编辑
+    3. 

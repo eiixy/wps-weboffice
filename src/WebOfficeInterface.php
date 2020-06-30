@@ -16,7 +16,7 @@ interface WebOfficeInterface
     public function online();
 
     // 上传文件新版本
-    public function save($file_id, $file): File;
+    public function save($file_id, $file, $user_id): File;
 
     // 获取特定版本的文件信息
     public function version($file_id, $version): File;
@@ -25,7 +25,7 @@ interface WebOfficeInterface
     public function rename($file_id, $name);
 
     // 获取所有历史版本文件信息
-    public function history($file_id, $offset, $count): Files;
+    public function history($file_id, $offset, $count);
 
     // 新建文件
     public function new($file_id, $file, $user_id): File;
